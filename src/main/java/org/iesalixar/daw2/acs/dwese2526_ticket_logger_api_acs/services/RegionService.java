@@ -7,6 +7,7 @@ import org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.dtos.RegionUpdateD
 import org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.entities.Region;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -18,6 +19,6 @@ public interface RegionService {
     void delete(Long id);
     RegionDetailDTO getDetail(Long id);
 
-    List<RegionDTO> listAll();
+    List<RegionDTO> listAll(Sort name);
     Region findById(Long id);
 }

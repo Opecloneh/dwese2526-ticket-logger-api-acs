@@ -54,22 +54,19 @@ public class RegionController {
     private MessageSource messageSource;
 
     /**
-     * Muestra la lista de todas las regiones.
-     *
-     * @return Nombre de la vista que renderiza la lista de regiones.
+     @GetMapping
+     public ResponseEntity<Page<RegionDTO>> listRegions(
+     @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+     logger.info("Listando regiones (REST) page={}, size={}, sort={}",
+     pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+     Page<RegionDTO> page = regionService.list(pageable);
+
+     logger.info("Se han cargado {} regiones en la pagina {}.", page.getNumberOfElements(), page.getNumber());
+
+     return ResponseEntity.ok(page);
+     }
      */
-    @GetMapping
-    public ResponseEntity<Page<RegionDTO>> listRegions(
-            @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
-        logger.info("Listando regiones (REST) page={}, size={}, sort={}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-        Page<RegionDTO> page = regionService.list(pageable);
-
-        logger.info("Se han cargado {} regiones en la pagina {}.", page.getNumberOfElements(), page.getNumber());
-
-        return ResponseEntity.ok(page);
-    }
 
     @PostMapping
     public ResponseEntity<RegionDTO> createRegion (@Valid @RequestBody RegionCreateDTO dto) {
@@ -108,7 +105,7 @@ public class RegionController {
      * @param id                 ID de la región a eliminar.
      * @return Redirección a la lista de regiones.
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping("/{id}")
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
         logger.info("Eliminando region (REST) con ID {}", id);
@@ -131,5 +128,20 @@ public class RegionController {
 
         return ResponseEntity.ok(regionDTO);
     }
+
+    @GetMapping
+    public ResponseEntity<?> listRegions(
+            @PageableDefault(size = 10, sort = "name") Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean unpaged) {
+
+
+        if (unpaged) {
+            return ResponseEntity.ok(regionService.listAll(Sort.by("name").ascending()));
+        }
+
+
+        return ResponseEntity.ok(regionService.list(pageable));
+    }
+
 
 }

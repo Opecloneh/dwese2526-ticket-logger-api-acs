@@ -13,6 +13,7 @@ import org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.repositories.Regio
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -75,7 +76,7 @@ public class RegionServiceImpl implements RegionService{
     }
 
     @Override
-    public List<RegionDTO> listAll() {
+    public List<RegionDTO> listAll(Sort name) {
         return regionRepository.findAll()
                 .stream()
                 .map(RegionMapper::toDTO)
