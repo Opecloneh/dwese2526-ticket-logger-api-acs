@@ -14,6 +14,7 @@ import org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.repositories.Provi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,18 +42,19 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
-    public void create(ProvinceCreateDTO dto) {
+    public ProvinceDTO create(ProvinceCreateDTO dto) {
         if (provinceRepository.existsByCode(dto.getCode())) {
             throw new DuplicateResourceException("province", "code", dto.getCode());
         }
 
         Region region = regionService.findById(dto.getRegionId());
         Province province = new Province(dto.getCode(), dto.getName(), region);
-        provinceRepository.save(province);
+        province = provinceRepository.save(province);
+        return ProvinceMapper.toDTO(province);
     }
 
     @Override
-    public void update(ProvinceUpdateDTO dto) {
+    public ProvinceDTO update(ProvinceUpdateDTO dto) {
         Province province = provinceRepository.findById(dto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("province", "id", dto.getId()));
 
@@ -65,7 +67,8 @@ public class ProvinceServiceImpl implements ProvinceService {
         province.setName(dto.getName());
         province.setRegion(region);
 
-        provinceRepository.save(province);
+        province = provinceRepository.save(province);
+        return ProvinceMapper.toDTO(province);
     }
 
     @Override
@@ -84,7 +87,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     }
 
     @Override
-    public List<ProvinceDTO> listAll() {
+    public List<ProvinceDTO> listAll(Sort name) {
         return provinceRepository.findAll().stream()
                 .map(ProvinceMapper::toDTO)
                 .toList();
