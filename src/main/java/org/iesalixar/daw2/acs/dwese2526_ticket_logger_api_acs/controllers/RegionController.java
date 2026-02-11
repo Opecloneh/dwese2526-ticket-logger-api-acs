@@ -1,5 +1,11 @@
 package org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.controllers;
-        
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.Servlet;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
@@ -54,22 +60,47 @@ public class RegionController {
     private MessageSource messageSource;
 
     /**
-     @GetMapping
-     public ResponseEntity<Page<RegionDTO>> listRegions(
-     @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
-     logger.info("Listando regiones (REST) page={}, size={}, sort={}",
-     pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-
-     Page<RegionDTO> page = regionService.list(pageable);
-
-     logger.info("Se han cargado {} regiones en la pagina {}.", page.getNumberOfElements(), page.getNumber());
-
-     return ResponseEntity.ok(page);
-     }
+     * @GetMapping public ResponseEntity<Page<RegionDTO>> listRegions(
+     * @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+     * logger.info("Listando regiones (REST) page={}, size={}, sort={}",
+     * pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+     * <p>
+     * Page<RegionDTO> page = regionService.list(pageable);
+     * <p>
+     * logger.info("Se han cargado {} regiones en la pagina {}.", page.getNumberOfElements(), page.getNumber());
+     * <p>
+     * return ResponseEntity.ok(page);
+     * }
      */
+    @Operation(summary = "Obtener todas las regiones", description = "Devuelve una lista de todas las regiones " + "disponibles en el sistema.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de regiones recuperada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = RegionDTO.class)))),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping
+    public ResponseEntity<?> listRegions(
+            @PageableDefault(size = 10, sort = "name") Pageable pageable,
+            @RequestParam(defaultValue = "false") boolean unpaged) {
 
+        if (unpaged) {
+            return ResponseEntity.ok(regionService.listAll(Sort.by("name").ascending()));
+        }
+
+        return ResponseEntity.ok(regionService.list(pageable));
+    }
+
+    @Operation(summary = "Crear una nueva region", description = "Permite registrar una nueva region en la base de datos.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Region creada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = RegionDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos proporcionados"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @PostMapping
-    public ResponseEntity<RegionDTO> createRegion (@Valid @RequestBody RegionCreateDTO dto) {
+    public ResponseEntity<RegionDTO> createRegion(@Valid @RequestBody RegionCreateDTO dto) {
         // 1) Delegamos la creacion al servicio
         RegionDTO created = regionService.create(dto);
 
@@ -99,12 +130,7 @@ public class RegionController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Elimina una región por su ID.
-     *
-     * @param id                 ID de la región a eliminar.
-     * @return Redirección a la lista de regiones.
-     */
+
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
@@ -120,6 +146,15 @@ public class RegionController {
         // 2) En REST, lo habitual en un DELETE correcto es 204 No Content (sin body)
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Obtener una region por ID", description = "Recupera una reigon " + "especifica segun su identificador unico.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Region encotrada",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = RegionDTO.class)))),
+            @ApiResponse(responseCode = "404", description = "Region no encontrada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<RegionDetailDTO> getRegionById(@PathVariable Long id) {
         logger.info("Mostrando detalle (REST) de la reguion con ID {}", id);
@@ -127,20 +162,6 @@ public class RegionController {
         RegionDetailDTO regionDTO = regionService.getDetail(id);
 
         return ResponseEntity.ok(regionDTO);
-    }
-
-    @GetMapping
-    public ResponseEntity<?> listRegions(
-            @PageableDefault(size = 10, sort = "name") Pageable pageable,
-            @RequestParam(defaultValue = "false") boolean unpaged) {
-
-
-        if (unpaged) {
-            return ResponseEntity.ok(regionService.listAll(Sort.by("name").ascending()));
-        }
-
-
-        return ResponseEntity.ok(regionService.list(pageable));
     }
 
 
