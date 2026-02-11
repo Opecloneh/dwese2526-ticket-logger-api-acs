@@ -6,11 +6,14 @@ import org.iesalixar.daw2.acs.dwese2526_ticket_logger_api_acs.dtos.ApiErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -145,4 +148,41 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
+    /**
+     * Credenciales inválidas / fallo de autenticación -> 401 Unauthorized.
+     */
+    @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<ApiErrorDTO> handleAuth(AuthenticationException ex, HttpServletRequest req) {
+
+
+        ApiErrorDTO body = ApiErrorDTO.basic(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                "Credenciales inválidas",
+                req.getRequestURI()
+        );
+
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
+
+    /**
+     * Acceso denegado -> 403 Forbidden.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorDTO> handleAccessDenied(AccessDeniedException ex, HttpServletRequest req) {
+
+
+        ApiErrorDTO body = ApiErrorDTO.basic(
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                "No tienes permisos para acceder a este recurso",
+                req.getRequestURI()
+        );
+
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
 }
