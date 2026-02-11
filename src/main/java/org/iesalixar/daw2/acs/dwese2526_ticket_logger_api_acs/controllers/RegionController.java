@@ -115,6 +115,14 @@ public class RegionController {
     }
 
 
+    @Operation(summary = "Actualizar una region", description = "Permite actualizar los datos de una region en la base de datos.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Region actualizada exitosamente",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = RegionDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<RegionDTO> updateRegion(@PathVariable Long id,
                                                   @Valid @RequestBody RegionUpdateDTO dto) {
@@ -131,8 +139,13 @@ public class RegionController {
     }
 
 
+    @Operation(summary = "Eliminar una region", description = "Permite eliminar una region especifica en la base de datos.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Region eliminada exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Region no encontrada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @DeleteMapping("/{id}")
-    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
         logger.info("Eliminando region (REST) con ID {}", id);
 
