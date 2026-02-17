@@ -109,7 +109,7 @@ public class ProvinceController {
 
         logger.info("Eliminando provincia (REST) con un ID {}", id);
 
-        regionService.delete(id);
+        provinceService.delete(id);
 
         logger.info("Provincia con ID {} eliminada con exito", id);
 
